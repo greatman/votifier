@@ -78,7 +78,7 @@ public class Votifier extends Plugin {
         PropertiesFile cfg = getConfig();
         File rsaDirectory = new File(new File(new File(Votifier.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParentFile(), "Votifier"), "rsa");
 		// Replace to remove a bug with Windows paths - SmilingDevil
-		String listenerDirectory = new File(new File(new File(new File(Votifier.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParentFile(), "Votifier"), "rsa"), "listener").toString();
+		String listenerDirectory = new File(new File(new File(Votifier.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParentFile(), "Votifier"), "listener").toString();
 
 		/*
 		 * Use IP address from server.properties as a default for
