@@ -131,7 +131,7 @@ public class Votifier extends Plugin {
 		 */
 		try {
 			if (!rsaDirectory.exists()) {
-				rsaDirectory.mkdir();
+				rsaDirectory.mkdirs();
 				new File(listenerDirectory).mkdir();
 				keyPair = RSAKeygen.generate(2048);
 				RSAIO.save(rsaDirectory, keyPair);
