@@ -27,6 +27,18 @@
 
     <build>
         <defaultGoal>clean package</defaultGoal>
+        <resources>
+            <resource>
+                <targetPath>.</targetPath>
+                <filtering>true</filtering>
+                <directory>${basedir}/src/main/resources</directory>
+                <includes>
+                    <include>*.yml</include>
+                    <include>*.info</include>
+                    <include>*.inf</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <!-- Compiler -->
             <plugin>
