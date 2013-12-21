@@ -23,9 +23,11 @@ import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.*;
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.java.JavaPlugin;
+
+import net.canarymod.Canary;
+import net.canarymod.config.Configuration;
+import net.canarymod.plugin.Plugin;
+import net.visualillusionsent.utils.PropertiesFile;
 import com.vexsoftware.votifier.crypto.RSAIO;
 import com.vexsoftware.votifier.crypto.RSAKeygen;
 import com.vexsoftware.votifier.model.ListenerLoader;
@@ -38,7 +40,7 @@ import com.vexsoftware.votifier.net.VoteReceiver;
  * @author Blake Beaupain
  * @author Kramer Campbell
  */
-public class Votifier extends JavaPlugin {
+public class Votifier extends Plugin {
 
 	/** The logger instance. */
 	private static final Logger LOG = Logger.getLogger("Votifier");
@@ -48,9 +50,6 @@ public class Votifier extends JavaPlugin {
 
 	/** The Votifier instance. */
 	private static Votifier instance;
-
-	/** The current Votifier version. */
-	private String version;
 
 	/** The vote listeners. */
 	private final List<VoteListener> listeners = new ArrayList<VoteListener>();
@@ -72,22 +71,14 @@ public class Votifier extends JavaPlugin {
 	}
 
 	@Override
-	public void onEnable() {
+	public boolean enable() {
 		Votifier.instance = this;
 
-		// Set the plugin version.
-		version = getDescription().getVersion();
-
-		// Handle configuration.
-		if (!getDataFolder().exists()) {
-			getDataFolder().mkdir();
-		}
-		File config = new File(getDataFolder() + "/config.yml");
-		YamlConfiguration cfg = YamlConfiguration.loadConfiguration(config);
-		File rsaDirectory = new File(getDataFolder() + "/rsa");
+		// Handle configuration.x
+        PropertiesFile cfg = getConfig();
+        File rsaDirectory = new File(new File(new File(Votifier.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParentFile(), "Votifier"), "rsa");
 		// Replace to remove a bug with Windows paths - SmilingDevil
-		String listenerDirectory = getDataFolder().toString()
-				.replace("\\", "/") + "/listeners";
+		String listenerDirectory = new File(new File(new File(new File(Votifier.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParentFile(), "Votifier"), "rsa"), "listener").toString();
 
 		/*
 		 * Use IP address from server.properties as a default for
@@ -95,24 +86,24 @@ public class Votifier extends JavaPlugin {
 		 * likely will return the main server address instead of the address
 		 * assigned to the server.
 		 */
-		String hostAddr = Bukkit.getServer().getIp();
-		if (hostAddr == null || hostAddr.length() == 0)
+		String hostAddr = Configuration.getServerConfig().getBindIp();
+        if (hostAddr == null || hostAddr.length() == 0)
 			hostAddr = "0.0.0.0";
 
 		/*
 		 * Create configuration file if it does not exists; otherwise, load it
 		 */
-		if (!config.exists()) {
+		if (!cfg.containsKey("host")) {
 			try {
 				// First time run - do some initialization.
 				LOG.info("Configuring Votifier for the first time...");
 
 				// Initialize the configuration file.
-				config.createNewFile();
 
-				cfg.set("host", hostAddr);
-				cfg.set("port", 8192);
-				cfg.set("debug", false);
+
+				cfg.setString("host", hostAddr);
+				cfg.setInt("port", 8192);
+				cfg.setBoolean("debug", false);
 
 				/*
 				 * Remind hosted server admins to be sure they have the right
@@ -125,16 +116,13 @@ public class Votifier extends JavaPlugin {
 				LOG.info("a different port, which you need to specify in config.yml");
 				LOG.info("------------------------------------------------------------------------------");
 
-				cfg.set("listener_folder", listenerDirectory);
-				cfg.save(config);
+				cfg.setString("listener_folder", listenerDirectory);
+				cfg.save();
 			} catch (Exception ex) {
 				LOG.log(Level.SEVERE, "Error creating configuration file", ex);
 				gracefulExit();
-				return;
+				return false;
 			}
-		} else {
-			// Load configuration.
-			cfg = YamlConfiguration.loadConfiguration(config);
 		}
 
 		/*
@@ -154,7 +142,7 @@ public class Votifier extends JavaPlugin {
 			LOG.log(Level.SEVERE,
 					"Error reading configuration file or RSA keys", ex);
 			gracefulExit();
-			return;
+			return false;
 		}
 
 		// Load the vote listeners.
@@ -173,14 +161,15 @@ public class Votifier extends JavaPlugin {
 			voteReceiver.start();
 
 			LOG.info("Votifier enabled.");
+            return true;
 		} catch (Exception ex) {
 			gracefulExit();
-			return;
+			return false;
 		}
 	}
 
 	@Override
-	public void onDisable() {
+	public void disable() {
 		// Interrupt the vote receiver.
 		if (voteReceiver != null) {
 			voteReceiver.shutdown();
@@ -199,15 +188,6 @@ public class Votifier extends JavaPlugin {
 	 */
 	public static Votifier getInstance() {
 		return instance;
-	}
-
-	/**
-	 * Gets the version.
-	 * 
-	 * @return The version
-	 */
-	public String getVersion() {
-		return version;
 	}
 
 	/**

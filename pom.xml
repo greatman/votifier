@@ -11,19 +11,17 @@
 
     <repositories>
         <repository>
-            <id>bukkit</id>
-            <url>http://repo.bukkit.org/content/groups/public/</url>
+            <id>CanaryLib-repo</id>
+            <url>http://repo.visualillusionsent.net/</url>
         </repository>
     </repositories>
     
     <dependencies>
         <!-- Bukkit Dependency -->
         <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.7.2-R0.1</version>
-            <type>jar</type>
-            <scope>compile</scope>
+            <groupId>net.canarymod</groupId>
+            <artifactId>CanaryLib</artifactId>
+            <version>1.0-RC-4-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

@@ -1,0 +1,5 @@
+name = ${name}
+main-class = com.vexsoftware.votifier.Votifier
+isLibrary = false
+author = Greatman
+version = ${version} ${BUILD_TAG}
